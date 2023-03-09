@@ -1,48 +1,96 @@
+// pipeline {
+//     agent any
+    
+//     tools {
+//         nodejs "nodejs"
+//     }
+
+//     environment {
+//         BACKEND_API = credentials('BACKEND_API')
+//         BACKEND_PORT = credentials('BACKEND_PORT')
+//     }
+
+//     stages {
+//         stage('Checkout') {
+//             steps {
+//                 git 'https://github.com/hangzh521/FotoPie-Front-end.git'
+//             }
+//         }
+        
+//         stage('Install Dependencies') {
+//             steps {
+//               sh 'npm install' 
+//             }
+//         }
+        
+//         stage('Build') {
+//             steps {
+//                 sh 'npm run build'
+//             }
+//         }
+        
+//         stage('Export') {
+//             steps {
+//                 sh 'npm run export'
+//                 sh 'ls -l out'
+//             }
+//         }
+        
+//         stage('Deploy') {
+//             steps {
+//                 withAWS(region: "${env.AWS_DEFAULT_REGION}", credentials: 'my-aws-credentials') {
+//                     sh "aws s3 cp /var/lib/jenkins/workspace/aws-p3/out s3://www.hangzh.click/ --recursive"
+//                 }
+//             }
+//         }
+//     }
+// }
+
 pipeline {
     agent any
-    
-    tools {
-        nodejs "nodejs"
-    }
 
     environment {
-        BACKEND_API = credentials('BACKEND_API')
-        BACKEND_PORT = credentials('BACKEND_PORT')
+    AWS_DEFAULT_REGION = "ap-southeast-2"
+    }
+
+    tools {
+        nodejs "nodejs"
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/hangzh521/FotoPie-Front-end.git'
+                // Get source code from  GitHub repository
+                git branch:'Do-06-Hang', url:'https://github.com/hangzh521/Front-end-1.git'
             }
         }
-        
+
         stage('Install Dependencies') {
             steps {
-              sh 'npm install' 
+               sh 'npm install'
             }
         }
-        
+
         stage('Build') {
             steps {
                 sh 'npm run build'
             }
         }
-        
+
         stage('Export') {
             steps {
                 sh 'npm run export'
                 sh 'ls -l out'
             }
         }
-        
-        stage('Deploy') {
+
+        stage('Deploy to S3') {
             steps {
-                withAWS(region: "${env.AWS_DEFAULT_REGION}", credentials: 'my-aws-credentials') {
+                withAWS(credentials: 'my-aws-credentials', region: "${env.AWS_DEFAULT_REGION}") {
                     sh "aws s3 cp /var/lib/jenkins/workspace/aws-p3/out s3://www.hangzh.click/ --recursive"
+
                 }
             }
         }
     }
 }
-
