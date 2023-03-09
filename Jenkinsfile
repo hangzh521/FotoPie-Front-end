@@ -51,33 +51,37 @@
 // }
 
 pipeline {
-  agent any
-  
-  stages {
-    stage('Checkout') {
-      steps {
-        git 'https://github.com/hangzh521/FotoPie-Front-end.git'
-      }
+    agent any
+
+    tools {
+       nodejs "nodejs"
+    }
+
+    stages {
+        stage('Checkout') {
+        steps {
+            git 'https://github.com/hangzh521/FotoPie-Front-end.git'
+         }
     }
 
     stage('Build') {
-      steps {
-        withCredentials([string(credentialsId: 'BACKEND_API', variable: 'BACKEND_API'),
-                         string(credentialsId: 'BACKEND_PORT', variable: 'BACKEND_PORT')]) {
-          sh 'npm install'
-          sh 'npm run build'
-          sh 'npm run export'
-          sh 'ls -l out'
+        steps {
+            withCredentials([string(credentialsId: 'BACKEND_API', variable: 'BACKEND_API'),
+                            string(credentialsId: 'BACKEND_PORT', variable: 'BACKEND_PORT')]) {
+            sh 'npm install'
+            sh 'npm run build'
+            sh 'npm run export'
+            sh 'ls -l out'
+            }
         }
-      }
     }
 
     stage('Deploy') {
-      steps {
-        withAWS(region: "${env.AWS_DEFAULT_REGION}", credentials: 'my-aws-credentials') {
-          sh "aws s3 cp /var/lib/jenkins/workspace/aws-p3/out s3://www.hangzh.click/ --recursive"
+        steps {
+            withAWS(region: "${env.AWS_DEFAULT_REGION}", credentials: 'my-aws-credentials') {
+            sh "aws s3 cp /var/lib/jenkins/workspace/aws-p3/out s3://www.hangzh.click/ --recursive"
+          }
         }
-      }
-    }
+     }
   }
 }
