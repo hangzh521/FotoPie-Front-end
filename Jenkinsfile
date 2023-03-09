@@ -6,6 +6,7 @@ pipeline {
     }
 
     environment {
+        AWS_DEFAULT_REGION = "ap-southeast-2"
         BACKEND_API = credentials('BACKEND_API')
         BACKEND_PORT = credentials('BACKEND_PORT')
     }
