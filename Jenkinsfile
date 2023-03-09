@@ -66,6 +66,7 @@ pipeline {
 
     stage('Build') {
         steps {
+          dir('path/to/project') {
             withCredentials([string(credentialsId: 'BACKEND_API', variable: 'BACKEND_API'),
                             string(credentialsId: 'BACKEND_PORT', variable: 'BACKEND_PORT')]) {
             sh 'npm install'
@@ -73,7 +74,8 @@ pipeline {
             sh 'npm run export'
             sh 'ls -l out'
             }
-        }
+         }
+      }
     }
 
     stage('Deploy') {
