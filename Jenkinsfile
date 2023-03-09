@@ -13,7 +13,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/hangzh521/FotoPie-Front-end.git'
+                 git branch:'Do-06-Hang', url：'https://github.com/hangzh521/FotoPie-Front-end.git'
             }
         }
         
