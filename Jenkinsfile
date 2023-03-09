@@ -86,7 +86,7 @@ pipeline {
         
         stage('Export') {
             steps {
-                npm 'run export'
+                sh 'npm run export'
                 sh 'ls -l out'
             }
         }
