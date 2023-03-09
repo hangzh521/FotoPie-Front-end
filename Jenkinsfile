@@ -13,6 +13,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
+                sh 'pwd'
                 git 'https://github.com/hangzh521/FotoPie-Front-end.git'
             }
         }
@@ -31,7 +32,7 @@ pipeline {
         
         stage('Export') {
             steps {
-                sh 'npm run build && npm run export'
+                sh 'npm run export'
                 sh 'ls -l out'
             }
         }
