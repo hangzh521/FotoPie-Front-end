@@ -43,6 +43,6 @@ pipeline {
                     sh "aws s3 cp /var/lib/jenkins/workspace/aws-p3/out s3://www.hangzh.click/ --recursive"
             }
         }
-    }
+     }
+  }
 }
-
