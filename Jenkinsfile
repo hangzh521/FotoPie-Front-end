@@ -61,7 +61,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 // Get source code from  GitHub repository
-                git branch:'Do-06-Hang', url:'https://github.com/hangzh521/Front-end-1.git'
+                url:'https://github.com/hangzh521/FotoPie-Front-end.git'
             }
         }
 
