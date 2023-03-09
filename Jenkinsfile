@@ -3,8 +3,6 @@ pipeline {
 
     environment {
         AWS_DEFAULT_REGION = "${env.AWS_DEFAULT_REGION}"
-        BACKEND_API = "${env.BACKEND_API}"
-        BACKEND_PORT = "${env.BACKEND_PORT}"
     }
 
     tools {
