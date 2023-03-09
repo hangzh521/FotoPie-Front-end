@@ -61,7 +61,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 // Get source code from  GitHub repository
-                url:'https://github.com/hangzh521/FotoPie-Front-end.git'
+              git 'https://github.com/hangzh521/FotoPie-Front-end.git'
             }
         }
 
