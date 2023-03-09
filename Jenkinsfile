@@ -8,6 +8,7 @@ pipeline {
     environment {
         BACKEND_API = credentials('BACKEND_API')
         BACKEND_PORT = credentials('BACKEND_PORT')
+        PATH = "${tool 'node'}:${tool 'npm'}:${env.PATH}:/path/to/next/bin"
     }
 
     stages {
