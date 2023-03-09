@@ -57,7 +57,7 @@ pipeline {
     agent any
     
     tools {
-        nodejs "nodejs"
+        nodejs "nodejs-18.14.2"
     }
 
     environment {
@@ -74,7 +74,7 @@ pipeline {
         
         stage('Install Dependencies') {
             steps {
-                sh 'npm install'
+                npm 'install' 
             }
         }
         
@@ -86,7 +86,7 @@ pipeline {
         
         stage('Export') {
             steps {
-                sh 'npm run export'
+                npm 'run export'
                 sh 'ls -l out'
             }
         }
