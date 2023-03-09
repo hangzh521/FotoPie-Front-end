@@ -39,9 +39,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 withAWS(region: "${env.AWS_DEFAULT_REGION}", credentials: 'my-aws-credentials') {
-                    sh "aws s3 cp /var/lib/jenkins/workspace/aws-p3/out s3://www.hangzh.click/"
-                    
-                     // --recursive --endpoint-url https://s3.amazonaws.com"
+                    sh "aws s3 cp /var/lib/jenkins/workspace/aws-p3/out s3://www.hangzh.click/ --recursive --endpoint-url https://s3.amazonaws.com"
                 }
             }
         }
