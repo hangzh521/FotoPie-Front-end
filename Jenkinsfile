@@ -33,6 +33,7 @@ pipeline {
             steps {
                 sh 'npm run export'
                 sh 'ls -l out'
+                sh 'printenv'
             }
         }
         
