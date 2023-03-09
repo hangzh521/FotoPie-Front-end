@@ -31,9 +31,8 @@ pipeline {
         
         stage('Export') {
             steps {
-                sh 'npm run export'
+                sh 'npm run build && npm run export'
                 sh 'ls -l out'
-                sh 'printenv'
             }
         }
         
