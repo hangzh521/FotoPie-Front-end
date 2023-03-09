@@ -31,8 +31,7 @@ pipeline {
         
         stage('Export') {
             steps {
-                // sh 'npm run build && npm run export'
-                sh 'npm --registry=https://registry.npmjs.org/ run export'
+                sh 'npm run build && npm run export'
                 sh 'ls -l out'
             }
         }
