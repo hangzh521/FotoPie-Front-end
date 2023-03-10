@@ -33,7 +33,6 @@ pipeline {
         stage('Export') {
             steps {
                 sh 'npm run export'
-                sh 'ls -l out'
             }
         }
         
