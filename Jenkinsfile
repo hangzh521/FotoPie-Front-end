@@ -41,7 +41,7 @@ pipeline {
             steps {
                 withAWS(region: "${env.AWS_DEFAULT_REGION}", credentials: 'my-aws-credentials') {
                     //sh "aws s3 cp /var/lib/jenkins/workspace/aws-p3/out s3://www.hangzh.click/ --recursive"
-                    sh " aws sync ./out s3://www.hangzh.click/"
+                    sh "aws s3 sync ./out s3://www.hangzh.click/"
              }
          }
       }
