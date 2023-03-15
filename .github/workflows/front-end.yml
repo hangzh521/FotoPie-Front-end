@@ -1,0 +1,42 @@
+name: S3 Pipeline
+
+on:
+  push:
+    branches:
+      - DO-06-Hang
+
+env:
+  AWS_DEFAULT_REGION: ap-southeast-2
+  BACKEND_API: ${{ secrets.BACKEND_API }}
+  BACKEND_PORT: ${{ secrets.BACKEND_PORT }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        ref: Do-06-Hang
+
+    - name: Install Dependencies
+      run: npm install
+
+    - name: Build
+      run: npm run build
+
+    - name: Export
+      run: |
+        npm run export
+        ls -l out
+
+    - name: Deploy
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_DEFAULT_REGION }}
+      
+      run: |
+        aws s3 sync ./out s3://www.hangzh.click/
