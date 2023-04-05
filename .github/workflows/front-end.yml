@@ -9,7 +9,7 @@ env:
   AWS_REGION: ap-southeast-2
   ECR_REGISTRY: 271584491311.dkr.ecr.ap-southeast-2.amazonaws.com
   ECR_REPOSITORY: node-app
-  IMAGE_TAG: ${{ github.sha }}
+  IMAGE_TAG: latest
   BACKEND_API: ${{ secrets.BACKEND_API }}
   BACKEND_PORT: ${{ secrets.BACKEND_PORT }}
 
@@ -38,11 +38,14 @@ jobs:
       run: |
         docker build --build-arg BACKEND_API="$BACKEND_API" \
          --build-arg BACKEND_PORT="$BACKEND_PORT" \
-         -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+         -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG . \
+         -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }} .
+
 
     - name: Tag and Push Docker image to Amazon ECR
       run: |
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG 
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }} 
 
 
 
