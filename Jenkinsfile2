@@ -11,11 +11,11 @@ pipeline {
   }
 
   stages {
-    stage('Checkout code') {
-      steps {
-        git branch: 'Do-06-Hang', url: 'https://github.com/hangzh521/FotoPie-Front-end.git'
-      }
-    }
+    stage('Checkout') {
+            steps {
+                 git branch: 'Do-06-Hang', url: 'https://github.com/hangzh521/FotoPie-Front-end.git'
+            }
+        }
     
     stage('Login to Amazon ECR') {
       steps {
