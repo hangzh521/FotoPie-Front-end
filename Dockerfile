@@ -25,4 +25,4 @@ COPY . .
 RUN npm run build
 
 # Start the application with the production build assets
-CMD ["npm", "start"]
+CMD ["npm", "run"]
