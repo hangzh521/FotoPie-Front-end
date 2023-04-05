@@ -1,44 +1,3 @@
-// pipeline {
-//   agent any
-
-//   environment {
-//     AWS_DEFAULT_REGION = credentials('AWS_DEFAULT_REGION')
-//     ECR_REGISTRY = credentials('ECR_REGISTRY')
-//     ECR_REPOSITORY = 'node-app'
-//     IMAGE_TAG = 'latest'
-//     BACKEND_API = credentials('BACKEND_API')
-//     BACKEND_PORT = credentials('BACKEND_PORT')
-//   }
-
-//   stages {
-//     stage('Checkout') {
-//             steps {
-//                  git branch: 'Do-06-Hang', url: 'https://github.com/hangzh521/FotoPie-Front-end.git'
-//             }
-//         }
-    
-//     stage('Login to Amazon ECR') {
-//         steps {
-//           withAWS(region: "${env.AWS_DEFAULT_REGION}", credentials: 'my-aws-credentials') {
-//              sh 'aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY'
-//        }
-//      }
-//     }
-//     stage('Build and tag Docker image') {
-//       steps {
-//         sh "docker build --build-arg BACKEND_API='$BACKEND_API' --build-arg BACKEND_PORT='$BACKEND_PORT' -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:${env.GITHUB_SHA} ."
-//       }
-//     }
-
-//     stage('Tag and Push Docker image to Amazon ECR') {
-//       steps {
-//         sh "docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-//         sh "docker push $ECR_REGISTRY/$ECR_REPOSITORY:${env.GITHUB_SHA}"
-//       }
-//      }
-//    }
-//  }
-
 pipeline {
   agent any
 
@@ -53,31 +12,31 @@ pipeline {
 
   stages {
     stage('Checkout') {
-      steps {
-        git branch: 'Do-06-Hang', url: 'https://github.com/hangzh521/FotoPie-Front-end.git'
-      }
-    }
-
-    stage('Login to Amazon ECR') {
-      steps {
-          sh "aws configure set region '$AWS_DEFAULT_REGION'" 
-          sh "aws configure set aws_access_key_id '$AWS_ACCESS_KEY_ID'"  
-          sh "aws configure set aws_secret_access_key '$AWS_SECRET_ACCESS_KEY'"
-          sh "aws ecr get-login-password --region '$AWS_DEFAULT_REGION' | docker login --username AWS --password-stdin '$ECR_REGISTRY'"
+            steps {
+                 git branch: 'Do-06-Hang', url: 'https://github.com/hangzh521/FotoPie-Front-end.git'
+            }
         }
-      }
-
+    
+    stage('Login to Amazon ECR') {
+        steps {
+          withAWS(region: '$AWS_DEFAULT_REGION', credentials: 'my-aws-credentials') {
+             sh 'aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY'
+       }
+     }
+    }
     stage('Build and tag Docker image') {
       steps {
-        sh "docker build --build-arg BACKEND_API='$BACKEND_API' --build-arg BACKEND_PORT='$BACKEND_PORT' -t '$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG' -t '$ECR_REGISTRY/$ECR_REPOSITORY:${env.GITHUB_SHA}' ."
+        sh "docker build --build-arg BACKEND_API='$BACKEND_API' --build-arg BACKEND_PORT='$BACKEND_PORT' -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:${env.GITHUB_SHA} ."
       }
     }
 
     stage('Tag and Push Docker image to Amazon ECR') {
       steps {
-        sh "docker push '$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG'"
-        sh "docker push '$ECR_REGISTRY/$ECR_REPOSITORY:${env.GITHUB_SHA}'"
+        sh "docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+        sh "docker push $ECR_REGISTRY/$ECR_REPOSITORY:${env.GITHUB_SHA}"
       }
-    }
-  }
-}
+     }
+   }
+ }
+
+
