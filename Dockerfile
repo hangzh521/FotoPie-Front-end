@@ -1,11 +1,15 @@
 # Use an official Node.js runtime as a parent image
 FROM node:lts-alpine3.14
 
-# Declare build-time variables     
+# Declare build-time variables    
+ARG AWS_ACCESS_KEY_ID    
+ARG AWS_SECRET_ACCESS_KEY    
 ARG BACKEND_API
 ARG BACKEND_PORT
 
 # set environment variables 
+ENV AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+ENV AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
 ENV BACKEND_API=$BACKEND_API
 ENV BACKEND_PORT=$BACKEND_PORT
 
