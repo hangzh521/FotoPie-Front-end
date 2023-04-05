@@ -36,7 +36,7 @@ jobs:
     - name: Build and tag Docker image
       id: build-image
       run: |
-        docker  --build-arg BACKEND_API="$BACKEND_API" \
+        docker build --build-arg BACKEND_API="$BACKEND_API" \
          --build-arg BACKEND_PORT="$BACKEND_PORT" \
          -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
 
