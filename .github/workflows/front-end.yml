@@ -3,7 +3,7 @@ name: Docker ECR Deploy
 on:
   push:
     branches:
-      - DO-06-Hang
+      - Do-06-Hang
 
 env:
   AWS_REGION: ap-southeast-2
