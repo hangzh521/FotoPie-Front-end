@@ -6,8 +6,8 @@ on:
       - Do-06-Hang
 
 env:
-  AWS_REGION: ap-southeast-2
-  ECR_REGISTRY: 271584491311.dkr.ecr.ap-southeast-2.amazonaws.com
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  ECR_REGISTRY: ${{ secrets.ECS_REGISTRY }}
   ECR_REPOSITORY: node-app
   IMAGE_TAG: latest
   BACKEND_API: ${{ secrets.BACKEND_API }}
@@ -31,7 +31,7 @@ jobs:
     - name: Login to Amazon ECR
       id: login-ecr
       run: |
-        aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin 271584491311.dkr.ecr.ap-southeast-2.amazonaws.com
+        aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECS_REGISTRY }}
    
     - name: Build and tag Docker image
       id: build-image
@@ -51,45 +51,3 @@ jobs:
 
 
 
-
-# name: S3 Pipeline
-
-# on:
-#   push:
-#     branches:
-#       - Do-06-Hang
-
-# env:
-#   AWS_DEFAULT_REGION: ap-southeast-2
-#   BACKEND_API: ${{ secrets.BACKEND_API }}
-#   BACKEND_PORT: ${{ secrets.BACKEND_PORT }}
-
-# jobs:
-#   build:
-#     runs-on: ubuntu-latest
-
-#     steps:
-#       - name: Checkout
-#         uses: actions/checkout@v2
-#         with:
-#           ref: Do-06-Hang
-
-#       - name: Install Dependencies
-#         run: npm install
-
-#       - name: Build
-#         run: npm run build
-
-#       - name: Export
-#         run: |
-#           npm run export
-
-#       - name: Configure AWS Credentials
-#         uses: aws-actions/configure-aws-credentials@v1
-#         with:
-#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#           aws-region: ${{ env.AWS_DEFAULT_REGION }}
-
-#       - name: Sync Files to S3
-#         run: aws s3 sync ./out s3://www.hangzh.click/

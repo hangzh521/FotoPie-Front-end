@@ -1,14 +1,6 @@
 # Use an official Node.js runtime as a parent image
 FROM node:lts-alpine3.14
 
-# # Declare build-time variables    
-# ARG BACKEND_API
-# ARG BACKEND_PORT
-
-# # set environment variables 
-# ENV BACKEND_API=$BACKEND_API
-# ENV BACKEND_PORT=$BACKEND_PORT
-
 # Set the working directory to /app
 WORKDIR /app
 
