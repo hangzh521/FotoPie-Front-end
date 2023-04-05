@@ -1,41 +1,99 @@
-name: S3 Pipeline
+name: Docker ECR Deploy
 
 on:
   push:
     branches:
-      - Do-06-Hang
+      - DO-06-Hang
 
 env:
-  AWS_DEFAULT_REGION: ap-southeast-2
-  BACKEND_API: ${{ secrets.BACKEND_API }}
-  BACKEND_PORT: ${{ secrets.BACKEND_PORT }}
+  AWS_REGION: ap-southeast-2
+  ECR_REGISTRY: 271584491311.dkr.ecr.ap-southeast-2.amazonaws.com
+  ECR_REPOSITORY: node-app
+  IMAGE_TAG: latest
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  ENV BACKEND_API=${{BACKEND_API}}
+  ENV BACKEND_PORT=${{BACKEND_PORT}}
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          ref: Do-06-Hang
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Install Dependencies
-        run: npm install
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
 
-      - name: Build
-        run: npm run build
+    - name: Login to Amazon ECR
+      id: login-ecr
+      run: |
+        aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin 271584491311.dkr.ecr.ap-southeast-2.amazonaws.com
+   
+    - name: Build and tag Docker image
+      id: build-image
+      run: |
+        docker build --build-arg AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" \
+         --build-arg AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" \
+         --build-arg BACKEND_API="$BACKEND_API" \
+         --build-arg BACKEND_PORT="$BACKEND_PORT" \
+         -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
 
-      - name: Export
-        run: |
-          npm run export
+    - name: Tag and Push Docker image to Amazon ECR
+      run: |
+        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA
+        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_DEFAULT_REGION }}
 
-      - name: Sync Files to S3
-        run: aws s3 sync ./out s3://www.hangzh.click/
+
+
+
+
+# name: S3 Pipeline
+
+# on:
+#   push:
+#     branches:
+#       - Do-06-Hang
+
+# env:
+#   AWS_DEFAULT_REGION: ap-southeast-2
+#   BACKEND_API: ${{ secrets.BACKEND_API }}
+#   BACKEND_PORT: ${{ secrets.BACKEND_PORT }}
+
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout
+#         uses: actions/checkout@v2
+#         with:
+#           ref: Do-06-Hang
+
+#       - name: Install Dependencies
+#         run: npm install
+
+#       - name: Build
+#         run: npm run build
+
+#       - name: Export
+#         run: |
+#           npm run export
+
+#       - name: Configure AWS Credentials
+#         uses: aws-actions/configure-aws-credentials@v1
+#         with:
+#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#           aws-region: ${{ env.AWS_DEFAULT_REGION }}
+
+#       - name: Sync Files to S3
+#         run: aws s3 sync ./out s3://www.hangzh.click/
