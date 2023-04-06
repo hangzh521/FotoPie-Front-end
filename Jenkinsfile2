@@ -67,7 +67,7 @@
             }
         
             steps {
-              sh 'docker build --build-arg BACKEND_API=$BACKEND_API --build-arg BACKEND_PORT=$BACKEND_PORT -t $ECR_REPO:$IMAGE_TAG .'
+              sh 'docker build --build-arg BACKEND_API=$BACKEND_API --build-arg BACKEND_PORT=$BACKEND_PORT -t node-app:latest .'
             }
          }
 
