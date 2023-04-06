@@ -62,7 +62,7 @@
         }
         stage('Build Docker Image') {
             steps {
-                sh 'docker build --build-arg BACKEND_API=$BACKEND_API --build-arg BACKEND_PORT=$BACKEND_PORT -t $ECR_REPO:$IMAGE_TAG .'
+                sh 'docker build -t $ECR_REPO:$IMAGE_TAG .'
             }
         }
         stage('Push Docker Image to ECR') {
@@ -82,3 +82,7 @@
         }
     }
 }
+
+
+
+// sh 'docker build --build-arg BACKEND_API=$BACKEND_API --build-arg BACKEND_PORT=$BACKEND_PORT -t $ECR_REPO:$IMAGE_TAG .'
