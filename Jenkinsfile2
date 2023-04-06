@@ -24,6 +24,14 @@
               sh 'docker build --build-arg BACKEND_API=$BACKEND_API --build-arg BACKEND_PORT=$BACKEND_PORT -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .'
             }
          }
+        
+        stage('Set Environment Variables') {
+           steps {
+              script {
+            env.GITHUB_SHA = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+          }
+       }
+    }
 
         stage('Push Docker Image to ECR') {
             environment {
@@ -32,7 +40,6 @@
             }
            steps {
                sh 'aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin $ECR_REGISTRY'
-               env.GITHUB_SHA = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
                sh "docker tag node-app:latest $ECR_REGISTRY/node-app:$GITHUB_SHA"
                sh "docker push $ECR_REGISTRY/node-app:$GITHUB_SHA"
                sh "docker tag node-app:latest $ECR_REGISTRY/node-app:latest"
