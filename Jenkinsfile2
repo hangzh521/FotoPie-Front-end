@@ -1,43 +1,36 @@
-pipeline {
-  agent any
+// pipeline {
+//   agent any
+//     AWS_DEFAULT_REGION = 'ap-southeast-2' //credentials('AWS_DEFAULT_REGION')
+//     ECR_REGISTRY = credentials' ('ECR_REGISTRY') //'271584491311.dkr.ecr.ap-southeast-2.amazonaws.com/node-app
+//     ECR_REPOSITORY = 'node-app'
+//     IMAGE_TAG = 'latest'
+//     BACKEND_API = credentials('BACKEND_API')
+//     BACKEND_PORT = credentials('BACKEND_PORT')
+//   }
 
-  environment {
-    AWS_DEFAULT_REGION = 'ap-southeast-2' //credentials('AWS_DEFAULT_REGION')
-    ECR_REGISTRY = '271584491311.dkr.ecr.ap-southeast-2.amazonaws.com/node-app //credentials' ('ECR_REGISTRY')
-    ECR_REPOSITORY = 'node-app'
-    IMAGE_TAG = 'latest'
-    BACKEND_API = credentials('BACKEND_API')
-    BACKEND_PORT = credentials('BACKEND_PORT')
-  }
-
-  stages {
-    // stage('Checkout') {
-    //         steps {
-    //              git branch: 'Do-06-Hang', url: 'https://github.com/hangzh521/FotoPie-Front-end.git'
-    //         }
-    //     }
+//   stages {
+//     stage('Checkout') {
+//             steps {
+//                  git branch: 'Do-06-Hang', url: 'https://github.com/hangzh521/FotoPie-Front-end.git'
+//             }
+//         }
     
-    // stage('Login to Amazon ECR') {
-    //     steps {
-    //     //    withAWS(region: 'ap-southeast-2', credentials: 'my-aws-credentials') 
-    //        script {
-    //          sh 'aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin 271584491311.dkr.ecr.ap-southeast-2.amazonaws.com/node-app'
-    //       }
-    //     }
-    //  }
-    stage('Cloning Git') {
-        steps {
-          checkout([$class: 'GitSCM', branches: [[name: '*/Do-06-Hang']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: 'https://github.com/hangzh521/FotoPie-Front-end.git']]]) 
-        }
-    }
+//     stage('Login to Amazon ECR') {
+//         steps {
+//         //    withAWS(region: 'ap-southeast-2', credentials: 'my-aws-credentials') 
+//            script {
+//              sh 'aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin 271584491311.dkr.ecr.ap-southeast-2.amazonaws.com/node-app'
+//           }
+//         }
+//      }
 
-    stage('Build and tag Docker image') {
-      steps {
-        script {
-        sh "docker build --build-arg BACKEND_API='$BACKEND_API' --build-arg BACKEND_PORT='$BACKEND_PORT' -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:${env.GITHUB_SHA} ."
-      }
-    }
- }
+//     stage('Build and tag Docker image') {
+//       steps {
+//         script {
+//         sh "docker build --build-arg BACKEND_API='$BACKEND_API' --build-arg BACKEND_PORT='$BACKEND_PORT' -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:${env.GITHUB_SHA} ."
+//       }
+//     }
+//  }
 
 //     stage('Tag and Push Docker image to Amazon ECR') {
 //       steps {
@@ -47,6 +40,54 @@ pipeline {
 //       }
 //      }
 //    }
-//  }
-  }
+//   }
+// }
+
+
+ pipeline {
+ agent any
+ environment {
+   AWS_ACCOUNT_ID="271584491311"
+   AWS_DEFAULT_REGION="ap-southeast-2" 
+   IMAGE_REPO_NAME="node-app"
+   IMAGE_TAG="latest"
+   REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
+ 
+ 
+ stages {
+ 
+ stage('Logging into AWS ECR') {
+ steps {
+ script {
+ sh "aws ecr get-login-password - region ${AWS_DEFAULT_REGION} | docker login - username AWS - password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
+ }
+ 
+ }
+ }
+ 
+ stage('Cloning Git') {
+ steps {
+ checkout([$class: 'GitSCM', branches: [[name: '*/Do-06-Hang']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: 'https://github.com/hangzh521/FotoPie-Front-end.git']]]) 
+ }
+ }
+ 
+ // Building Docker images
+ stage('Building image') {
+ steps{
+ script {
+ dockerImage = docker.build "${IMAGE_REPO_NAME}:${IMAGE_TAG}"
+ }
+ }
+ }
+ 
+ // Uploading Docker images into AWS ECR
+ stage('Pushing to ECR') {
+ steps{ 
+ script {
+ sh "docker tag ${IMAGE_REPO_NAME}:${IMAGE_TAG} ${REPOSITORY_URI}:$IMAGE_TAG"
+ sh "docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}"
+ }
+ }
+ }
+ }
 }
