@@ -21,7 +21,7 @@
             }
          
             steps {
-              sh 'docker build --build-arg BACKEND_API=$BACKEND_API --build-arg BACKEND_PORT=$BACKEND_PORT -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:${GITHUB_SHA::7} .'
+              sh 'docker build --build-arg BACKEND_API=$BACKEND_API --build-arg BACKEND_PORT=$BACKEND_PORT -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .'
             }
          }
 
@@ -32,14 +32,21 @@
             }
            steps {
                     sh 'aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin $ECR_REGISTRY'
-                    sh 'docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG'
-                    sh 'docker push $ECR_REGISTRY/$ECR_REPOSITORY:${GITHUB_SHA::7}'
+                    sh 'docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA'
+                    sh 'docker push $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA'
+                    sh 'docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG'
+                    sh 'docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+'
                  }
              }
           }
        }
      
+        
 
 
 // sh 'docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG'
 // '271584491311.dkr.ecr.ap-southeast-2.amazonaws.com'
+
+// sh 'docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG'
+// sh 'docker push $ECR_REGISTRY/$ECR_REPOSITORY:${GITHUB_SHA::7}'
