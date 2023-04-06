@@ -73,8 +73,8 @@
 
         stage('Push Docker Image to ECR') {
             environment {
-                AWS ACCESS KEY = credentials('AWS ACCESS KEY')
-                AWS SECRET ACCESS KEY = credentials('AWS_SECRET_ACCESS_KEY' )
+                AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
+                AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
             }
            steps {
                     sh 'aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin ECR_REGISTRY/$ECR_REPO'
@@ -87,4 +87,3 @@
 
 
 
-// sh 'docker build --build-arg BACKEND_API=$BACKEND_API --build-arg BACKEND_PORT=$BACKEND_PORT -t $ECR_REPO:$IMAGE_TAG .'
