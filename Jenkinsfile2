@@ -5,7 +5,7 @@ pipeline {
     AWS_DEFAULT_REGION = 'ap-southeast-2'
     ECR_REPO = 'node-app'
     IMAGE_TAG = 'latest'
-    ECR_REGISTRY = '271584491311.dkr.ecr.ap-southeast-2.amazonaws.com/node-app'
+    ECR_REGISTRY = '271584491311.dkr.ecr.ap-southeast-2.amazonaws.com'
     }
 
     stages {
@@ -21,7 +21,7 @@ pipeline {
             }
         
             steps {
-              sh 'docker build --build-arg BACKEND_API=$BACKEND_API --build-arg BACKEND_PORT=$BACKEND_PORT -t node-app:latest .'
+              sh 'docker build --build-arg BACKEND_API=$BACKEND_API --build-arg BACKEND_PORT=$BACKEND_PORT -t $ECR_REPO:$IMAGE_TAG .'
             }
          }
 
@@ -31,9 +31,9 @@ pipeline {
                 AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
             }
            steps {
-                    sh 'aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin 271584491311.dkr.ecr.ap-southeast-2.amazonaws.com'
-                    sh 'docker tag node-app:latest 271584491311.dkr.ecr.ap-southeast-2.amazonaws.com/node-app:latest'
-                    sh 'docker push 271584491311.dkr.ecr.ap-southeast-2.amazonaws.com/node-app:latest'
+                    sh 'aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin $ECR_REGISTRY'
+                    sh 'docker tag $ECR_REPO:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG'
+                    sh 'docker push $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG'
                 }
             }
         }
