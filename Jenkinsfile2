@@ -12,18 +12,13 @@ pipeline {
 
   stages {
     stage('Checkout') {
-            steps {
-                 git branch: 'Do-06-Hang', url: 'https://github.com/hangzh521/FotoPie-Front-end.git'
-            }
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'git-credentials', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
+          git branch: 'Do-06-Hang', url: 'https://github.com/hangzh521/FotoPie-Front-end.git', credentialsId: 'git-credentials'
         }
-    
-    stage('Login to Amazon ECR') {
-        steps {
-          withAWS(region: '$AWS_DEFAULT_REGION', credentials: 'my-aws-credentials') {
-             sh 'aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY'
-       }
-     }
+      }
     }
+    
     stage('Build and tag Docker image') {
       steps {
         sh "docker build --build-arg BACKEND_API='$BACKEND_API' --build-arg BACKEND_PORT='$BACKEND_PORT' -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:${env.GITHUB_SHA} ."
