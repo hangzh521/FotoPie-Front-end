@@ -45,47 +45,38 @@
 
 
  pipeline {
-  agent any
+    agent any
 
-  environment {
-    AWS_DEFAULT_REGION = 'us-west-2'
-    ECR_REGISTRY = '1234567890.dkr.ecr.us-west-2.amazonaws.com'
-    ECR_REPOSITORY = 'node-app'
-    IMAGE_TAG = 'latest'
-    BACKEND_API = credentials('BACKEND_API')
-    BACKEND_PORT = credentials('BACKEND_PORT')
-  }
+    AWS_DEFAULT_REGION = 'ap-southeast-2'
+    ECR_REPO = 'node-app'
+    IMAGE_TAG = latest
+    ECR_REGISTRY = '271584491311.dkr.ecr.ap-southeast-2.amazonaws.com/node-app'
 
-  stages {
-    stage('Checkout') {
-      steps {
-        git branch: 'Do-06-Hang', url: 'https://github.com/hangzh521/FotoPie-Front-end.git'
-      }
-    }
-
-    stage('Login to Amazon ECR') {
-      steps {
-          withCredentials([string(credentialsId: 'AWS_ACCESS_KEY_ID', variable: 'AWS_ACCESS_KEY_ID'),
-                           string(credentialsId: 'AWS_SECRET_ACCESS_KEY', variable: 'AWS_SECRET_ACCESS_KEY')]) {
-            sh "aws configure set region $AWS_DEFAULT_REGION" 
-            sh "aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID"  
-            sh "aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY"
-            sh 'aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY'
-          }
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout([$class: 'GitSCM', branches: [[name: '*/Do-06-Hang']], userRemoteConfigs: [[url: 'https://github.com/hangzh521/FotoPie-Front-end.git']]])
+            }
         }
-      }
-
-    stage('Build and tag Docker image') {
-      steps {
-        sh "docker build --build-arg BACKEND_API=\"$BACKEND_API\" --build-arg BACKEND_PORT=\"$BACKEND_PORT\" -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:${env.GITHUB_SHA} ."
-      }
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build --build-arg BACKEND_API=$BACKEND_API --build-arg BACKEND_PORT=$BACKEND_PORT -t $ECR_REPO:$IMAGE_TAG .'
+            }
+        }
+        stage('Push Docker Image to ECR') {
+            steps {
+                withCredentials([
+                    [
+                        $class: 'AmazonWebServicesCredentialsBinding',
+                        accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                        // credentialsId: 'your-aws-credentials-id'
+                    ]
+                ]) {
+                    sh 'aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin ECR_REGISTRY/$ECR_REPO'
+                    sh 'docker push ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG'
+                }
+            }
+        }
     }
-
-    stage('Tag and Push Docker image to Amazon ECR') {
-      steps {
-        sh "docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-        sh "docker push $ECR_REGISTRY/$ECR_REPOSITORY:${env.GITHUB_SHA}"
-      }
-    }
-  }
- }
+}
