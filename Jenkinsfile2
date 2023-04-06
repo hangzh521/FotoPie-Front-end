@@ -3,7 +3,7 @@ pipeline {
 
   environment {
     AWS_DEFAULT_REGION = 'ap-southeast-2' //credentials('AWS_DEFAULT_REGION')
-    ECR_REGISTRY = credentials('ECR_REGISTRY')
+    ECR_REGISTRY = 271584491311.dkr.ecr.ap-southeast-2.amazonaws.com/node-app //credentials('ECR_REGISTRY')
     ECR_REPOSITORY = 'node-app'
     IMAGE_TAG = 'latest'
     BACKEND_API = credentials('BACKEND_API')
@@ -11,32 +11,42 @@ pipeline {
   }
 
   stages {
-    stage('Checkout') {
-            steps {
-                 git branch: 'Do-06-Hang', url: 'https://github.com/hangzh521/FotoPie-Front-end.git'
-            }
-        }
+    // stage('Checkout') {
+    //         steps {
+    //              git branch: 'Do-06-Hang', url: 'https://github.com/hangzh521/FotoPie-Front-end.git'
+    //         }
+    //     }
     
     stage('Login to Amazon ECR') {
         steps {
-          withAWS(region: 'ap-southeast-2', credentials: 'my-aws-credentials') {
-             sh 'aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin $ECR_REGISTRY'
-       }
+        //    withAWS(region: 'ap-southeast-2', credentials: 'my-aws-credentials') 
+           script {
+             sh 'aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin 271584491311.dkr.ecr.ap-southeast-2.amazonaws.com/node-app'
+          }
+        }
      }
+    stage('Cloning Git') {
+        steps {
+          checkout([$class: 'GitSCM', branches: [[name: '*/Do-06-Hang']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: 'https://github.com/hangzh521/FotoPie-Front-end.git']]]) 
+        }
     }
+
     stage('Build and tag Docker image') {
       steps {
+        script {
         sh "docker build --build-arg BACKEND_API='$BACKEND_API' --build-arg BACKEND_PORT='$BACKEND_PORT' -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:${env.GITHUB_SHA} ."
       }
     }
+ }
 
     stage('Tag and Push Docker image to Amazon ECR') {
       steps {
+        script {
         sh "docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
         sh "docker push $ECR_REGISTRY/$ECR_REPOSITORY:${env.GITHUB_SHA}"
       }
      }
    }
  }
-
+}
 
