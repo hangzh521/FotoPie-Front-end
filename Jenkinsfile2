@@ -21,7 +21,7 @@ pipeline {
             }
         
             steps {
-                sh "docker build --build-arg BACKEND_API=$BACKEND_API --build-arg BACKEND_PORT=$BACKEND_PORT -t $ECR_REGISTRY:$IMAGE_TAG -t $ECR_REGISTRY:${GITHUB_SHA::7} ."
+                sh "docker build --build-arg BACKEND_API=$BACKEND_API --build-arg BACKEND_PORT=$BACKEND_PORT -t $ECR_REGISTRY:$IMAGE_TAG -t node-app${GITHUB_SHA::7} ."
             }
          }
 
