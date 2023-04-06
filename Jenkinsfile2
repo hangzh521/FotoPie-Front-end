@@ -72,22 +72,18 @@
          }
 
         stage('Push Docker Image to ECR') {
-            steps {
-                withCredentials([
-                    [
-                        $class: 'AmazonWebServicesCredentialsBinding',
-                        accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-                        // credentialsId: 'your-aws-credentials-id'
-                    ]
-                ]) {
+            environment {
+                AWS ACCESS KEY = credentials('AWS ACCESS KEY')
+                AWS SECRET ACCESS KEY = credentials('AWS_SECRET_ACCESS_KEY' )
+            }
+           steps {
                     sh 'aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin ECR_REGISTRY/$ECR_REPO'
                     sh 'docker push ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG'
                 }
             }
         }
      }
-  }
+  
 
 
 
