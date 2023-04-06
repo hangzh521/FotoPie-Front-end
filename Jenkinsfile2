@@ -1,37 +1,29 @@
- pipeline {
+pipeline {
     agent any
     
     environment {
     AWS_DEFAULT_REGION = 'ap-southeast-2'
-    ECR_REPOSITORY = 'node-app'
+    ECR_REPO = 'node-app'
     IMAGE_TAG = 'latest'
-    ECR_REGISTRY = credentials ('ECR_REGISTRY') 
-   }
+    ECR_REGISTRY = '271584491311.dkr.ecr.ap-southeast-2.amazonaws.com/node-app'
+    }
 
     stages {
         stage('Checkout') {
             steps {
                 checkout([$class: 'GitSCM', branches: [[name: '*/Do-06-Hang']], userRemoteConfigs: [[url: 'https://github.com/hangzh521/FotoPie-Front-end.git']]])
             }
-         }
+        }
         stage('Build Docker Image') {
             environment {
                 BACKEND_API = credentials('BACKEND_API')
                 BACKEND_PORT = credentials('BACKEND_PORT')
             }
-         
+        
             steps {
-              sh 'docker build --build-arg BACKEND_API=$BACKEND_API --build-arg BACKEND_PORT=$BACKEND_PORT -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .'
+              sh 'docker build --build-arg BACKEND_API=$BACKEND_API --build-arg BACKEND_PORT=$BACKEND_PORT -t node-app:latest .'
             }
          }
-        
-        stage('Set Environment Variables') {
-           steps {
-              script {
-                env.GITHUB_SHA = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
-          }
-       }
-    }
 
         stage('Push Docker Image to ECR') {
             environment {
@@ -39,20 +31,10 @@
                 AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
             }
            steps {
-               sh 'aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin $ECR_REGISTRY'
-               sh "docker tag node-app:latest $ECR_REGISTRY/node-app:$GITHUB_SHA"
-               sh "docker push $ECR_REGISTRY/node-app:latest"
-             }
-           }
-         }
-      }
-     
-        
-
-
-// sh 'docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG'
-// '271584491311.dkr.ecr.ap-southeast-2.amazonaws.com'
-
-// sh "docker push 271584491311.dkr.ecr.ap-southeast-2.amazonaws.com/node-app:$GITHUB_SHA"
-// sh "docker tag node-app:latest 271584491311.dkr.ecr.ap-southeast-2.amazonaws.com/node-app:latest"
-
+                    sh 'aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin 271584491311.dkr.ecr.ap-southeast-2.amazonaws.com'
+                    sh 'docker tag node-app:latest 271584491311.dkr.ecr.ap-southeast-2.amazonaws.com/node-app:latest'
+                    sh 'docker push 271584491311.dkr.ecr.ap-southeast-2.amazonaws.com/node-app:latest'
+                }
+            }
+        }
+     }
