@@ -17,14 +17,14 @@ pipeline {
     //         }
     //     }
     
-    stage('Login to Amazon ECR') {
-        steps {
-        //    withAWS(region: 'ap-southeast-2', credentials: 'my-aws-credentials') 
-           script {
-             sh 'aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin 271584491311.dkr.ecr.ap-southeast-2.amazonaws.com/node-app'
-          }
-        }
-     }
+    // stage('Login to Amazon ECR') {
+    //     steps {
+    //     //    withAWS(region: 'ap-southeast-2', credentials: 'my-aws-credentials') 
+    //        script {
+    //          sh 'aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin 271584491311.dkr.ecr.ap-southeast-2.amazonaws.com/node-app'
+    //       }
+    //     }
+    //  }
     stage('Cloning Git') {
         steps {
           checkout([$class: 'GitSCM', branches: [[name: '*/Do-06-Hang']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: 'https://github.com/hangzh521/FotoPie-Front-end.git']]]) 
@@ -39,14 +39,14 @@ pipeline {
     }
  }
 
-    stage('Tag and Push Docker image to Amazon ECR') {
-      steps {
-        script {
-        sh "docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-        sh "docker push $ECR_REGISTRY/$ECR_REPOSITORY:${env.GITHUB_SHA}"
-      }
-     }
-   }
- }
+//     stage('Tag and Push Docker image to Amazon ECR') {
+//       steps {
+//         script {
+//         sh "docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+//         sh "docker push $ECR_REGISTRY/$ECR_REPOSITORY:${env.GITHUB_SHA}"
+//       }
+//      }
+//    }
+//  }
 }
 
