@@ -40,10 +40,10 @@
             }
            steps {
                sh 'aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin $ECR_REGISTRY'
-               sh "docker tag node-app:latest $ECR_REGISTRY/node-app:$GITHUB_SHA"
-               sh "docker push $ECR_REGISTRY/node-app:$GITHUB_SHA"
-               sh "docker tag node-app:latest $ECR_REGISTRY/node-app:latest"
-               sh "docker push $ECR_REGISTRY/node-app:latest"
+               sh "docker tag node-app:latest $[ECR_REGISTRY]/node-app:$GITHUB_SHA"
+               sh "docker push 271584491311.dkr.ecr.ap-southeast-2.amazonaws.com/node-app:$GITHUB_SHA"
+               sh "docker tag node-app:latest 271584491311.dkr.ecr.ap-southeast-2.amazonaws.com/node-app:latest"
+               sh "docker push 271584491311.dkr.ecr.ap-southeast-2.amazonaws.com/node-app:latest"
                }
              }
           }
