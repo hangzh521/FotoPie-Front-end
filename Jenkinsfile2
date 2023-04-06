@@ -3,7 +3,7 @@ pipeline {
 
   environment {
     AWS_DEFAULT_REGION = 'ap-southeast-2' //credentials('AWS_DEFAULT_REGION')
-    ECR_REGISTRY = 271584491311.dkr.ecr.ap-southeast-2.amazonaws.com/node-app //credentials('ECR_REGISTRY')
+    ECR_REGISTRY = '271584491311.dkr.ecr.ap-southeast-2.amazonaws.com/node-app //credentials' ('ECR_REGISTRY')
     ECR_REPOSITORY = 'node-app'
     IMAGE_TAG = 'latest'
     BACKEND_API = credentials('BACKEND_API')
