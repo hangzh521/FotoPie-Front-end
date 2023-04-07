@@ -11,7 +11,7 @@ env:
   ECR_REPOSITORY: node-app
   IMAGE_TAG: latest
   BACKEND_API: ${{ secrets.BACKEND_API }}
-  BACKEND_PORT: ${{ secrets.BACKEND_PORT }}
+  BACKEND_PORT: ${{ secrets.Get_Synonyms_API_Prefix }}
 
 jobs:
   build:
@@ -37,7 +37,7 @@ jobs:
       id: build-image
       run: |
         docker build --build-arg BACKEND_API="$BACKEND_API" \
-         --build-arg BACKEND_PORT="$BACKEND_PORT" \
+         --build-arg Get_Synonyms_API_Prefix="$Get_Synonyms_API_Prefix" \
          -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG . \
          -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }} 
 

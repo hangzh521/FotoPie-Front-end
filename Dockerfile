@@ -15,11 +15,11 @@ COPY . .
 
 # Declare build-time variables    
 ARG BACKEND_API
-ARG BACKEND_PORT
+ARG Get_Synonyms_API_Prefix
 
 # set environment variables 
 ENV BACKEND_API=$BACKEND_API
-ENV BACKEND_PORT=$BACKEND_PORT
+ENV Get_Synonyms_API_PrefixT=$Get_Synonyms_API_Prefix
 
 # Build the application
 RUN npm run build
