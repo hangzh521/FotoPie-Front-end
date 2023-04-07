@@ -15,7 +15,7 @@ pipeline {
         stage('Build Docker Image') {
             environment {
                 BACKEND_API = credentials('BACKEND_API')
-                BACKEND_PORT = credentials('Get_Synonyms_API_Prefix')
+                Get_Synonyms_API_Prefix = credentials('Get_Synonyms_API_Prefix')
             }
         
             steps {
