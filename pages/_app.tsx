@@ -5,6 +5,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { CacheProvider, EmotionCache } from "@emotion/react";
 import theme from "../src/utils/theme";
 import createEmotionCache from "../src/utils/createEmotionCache";
+// import { PersistGate } from "redux-persist/integration/react";
 
 import { store } from "../store/store";
 import { Provider } from "react-redux";
@@ -20,6 +21,7 @@ export default function MyApp(props: MyAppProps) {
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
   return (
     <Provider store={store}>
+      {/* <PersistGate loading={null} persistor={persistor}> */}
       <CacheProvider value={emotionCache}>
         <Head>
           <meta name="viewport" content="initial-scale=1, width=device-width" />
@@ -30,6 +32,7 @@ export default function MyApp(props: MyAppProps) {
           <Component {...pageProps} />
         </ThemeProvider>
       </CacheProvider>
+      {/* </PersistGate> */}
     </Provider>
   );
 }

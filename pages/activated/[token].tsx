@@ -5,7 +5,7 @@ import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import Copyright from "../../src/components/Copyright"
-import axiosRequest from "../../src/utils/axiosRequest";
+import { activateEmail } from '../../src/axiosRequest/api/user';
 
 export default function Activated() {
     const router = useRouter()
@@ -18,9 +18,7 @@ export default function Activated() {
         }
     }
 
-    axiosRequest( 
-
-      "/api/user/signup", "POST", {token})
+    activateEmail({ token })
       .then(response => response.status)
       .catch(err => console.log(err))
  

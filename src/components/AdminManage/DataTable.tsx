@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import axiosRequest from "../../utils/axiosRequest";
+import { adminGetUserData } from "../../axiosRequest/api/admin";
 
 //Define the column field types
 const columns: GridColDef[] = [
@@ -15,11 +15,16 @@ const columns: GridColDef[] = [
 export default function DataTable() {
   const [users, setUsers] = useState([]);
 
-  //fetch data
   useEffect(() => {
-    axiosRequest("/api/admin/user", "GET").then((response) =>
-      setUsers(response.data)
-    );
+    const fetchData = async () => {
+      try {
+        const response = await adminGetUserData();
+        setUsers(response.data);
+      } catch (error: any) {
+        console.error(error);
+      }
+    };
+    fetchData();
   }, []);
 
   return (

@@ -1,0 +1,15 @@
+.gradientText {
+  background-image: linear-gradient(
+    45deg,
+    red,
+    orange,
+    green,
+    blue,
+    indigo,
+    violet
+  );
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}

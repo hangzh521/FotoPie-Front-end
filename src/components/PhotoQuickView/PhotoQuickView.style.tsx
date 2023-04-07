@@ -1,0 +1,16 @@
+export const PhotoQuickViewStyles = {
+  position: "absolute" as "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: "85vw",
+  bgcolor: "background.paper",
+  outline: "none",
+  boxSizing: "border-box",
+  borderRadius: "10px",
+  boxShadow: 24,
+  pt: { xs: 0.5, sm: 2, md: 4 },
+  pb: { xs: 2, sm: 2, md: 4 },
+  pl: { xs: 2, sm: 3, md: 4 },
+  pr: { xs: 2, sm: 3, md: 4 },
+};

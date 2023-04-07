@@ -20,7 +20,7 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "store/reducers.tsx",
+    "store/reducers.ts",
     "store/ContextProvider.tsx"
   ],
   "exclude": ["node_modules"]

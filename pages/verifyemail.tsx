@@ -1,4 +1,3 @@
-import React from 'react'
 import Link from 'next/link'
 import { Alert } from '@mui/material'
 import Typography from "@mui/material/Typography";
@@ -31,13 +30,13 @@ export default function VerifyEmail () {
           <Link 
             // underline="hover" 
             color="inherit" 
-            href='signup'>
+            href='/signup'>
             {'click here to request another.'}
           </Link>
         </Alert>
 
         <Button
-              href="login"
+              href="/login"
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}

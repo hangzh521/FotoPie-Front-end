@@ -1,24 +1,28 @@
-import { useState } from "react";
+import { useEffect } from "react";
+import { useRouter } from "next/router";
 import Avatar from "@mui/material/Avatar";
-import Button from "@mui/material/Button";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
-import Link from "../src/utils/Link";
+import { useDispatch, useSelector } from "react-redux";
+import { Schema, string, object } from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { SubmitHandler, useForm, FormProvider } from "react-hook-form";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
+import Link from "../src/utils/Link";
 import Copyright from "../src/components/Copyright";
-import { SubmitHandler, useForm, FormProvider } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { Schema, string, object } from "yup";
-import FormTextField from "../src/components/textField/formTextField";
-import { useRouter } from "next/router";
-import axiosRequest from "../src/utils/axiosRequest";
+import FormTextField from "../src/components/LoginForm/FormTextField";
+import { AppDispatch, RootState } from "../store/store";
+import { login } from "../store/auth/authAciton";
+import LoginButton from "../src/components/LoginForm/LoginButton";
+import ErrorAlert from "../src/components/LoginForm/ErrorAlert";
+import NavBar from "../src/components/NavBar/NavBar";
+import { NavBarStyles } from "../src/components/NavBar/NavbarBaseline.style";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Define a type with the shape of the form values
-interface IFormInput {
+export interface IFormInput {
   email: string;
   password: string;
 }
@@ -30,106 +34,106 @@ const formSchema: Schema<IFormInput> = object({
 });
 
 // Define a component that renders the form
-export default function SignIn() {
-  const [loginError, setLoginError] = useState(null);
-
+export default function LogIn() {
   const router = useRouter();
+  const { loginStatus, error, isAuthenticated } = useSelector(
+    (state: RootState) => state.auth
+  );
+  const dispatch = useDispatch<AppDispatch>();
 
   // Use the useForm hook to create a form controller
   const methods = useForm<IFormInput>({
     resolver: yupResolver(formSchema),
   });
-
   // Define a submit handler for the form
-  const onSubmit: SubmitHandler<IFormInput> = async (data: IFormInput) => {
-    try {
-      const response = await axiosRequest("/api/auth/login", "POST", data);
-      console.log(response);
-      if (response.status === 200) {
-        window.localStorage.setItem("accessToken", response.data.access_token);
-        window.localStorage.setItem(
-          "refreshToken",
-          response.data.refresh_token
-        );
-
-        // redirect to home page
-        router.push("/");
-      }
-
-      // TODO: handle error and set error type
-    } catch (error: any) {
-      setLoginError(error.message);
-    }
+  const onSubmit: SubmitHandler<IFormInput> = (data) => {
+    dispatch(login(data));
   };
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/");
+    }
+  }, [isAuthenticated]);
+
   return (
-    <Container component="main" maxWidth="xs">
-      {/*  TODO: add error message */}
-      <p>{loginError}</p>
-      <Box
-        sx={{
-          marginTop: 8,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
-        <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
-          <LockOutlinedIcon />
-        </Avatar>
-        <Typography component="h1" variant="h5">
-          Login
-        </Typography>
-
-        <FormProvider {...methods}>
-          <Box
-            component="form"
-            onSubmit={methods.handleSubmit(onSubmit)}
-            sx={{ mt: 1 }}
-          >
-            <FormTextField
-              name="email"
-              label="Email Address"
-              id="email"
-              autoComplete="email"
-            />
-
-            <FormTextField
-              name="password"
-              label="Password"
-              id="password"
-              type="password"
-              autoComplete="current-password"
-            />
-
-            <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
-              label="Remember me"
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
+    <>
+      <AnimatePresence mode="wait">
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -50 }}
+          transition={{ duration: 1 }}
+        >
+          <NavBar isFixed={false} color="#000000" baseLine={NavBarStyles} />
+          <Container component="main" maxWidth="xs" sx={{ mt: 10 }}>
+            {/* error handling*/}
+            {error && <ErrorAlert error={error} />}
+            <Box
+              sx={{
+                marginTop: 3,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
             >
-              Log In
-            </Button>
-            <Grid container>
-              <Grid item xs>
-                <Link href="#" variant="body2">
-                  Forgot password?
-                </Link>
-              </Grid>
-              <Grid item>
-                <Link href="signup" variant="body2">
-                  {"Don't have an account? Sign Up"}
-                </Link>
-              </Grid>
-            </Grid>
-          </Box>
-        </FormProvider>
-      </Box>
+              {/* login icon */}
+              <Avatar sx={{ m: 1, bgcolor: "primary.main" }}>
+                <LockOutlinedIcon />
+              </Avatar>
+              <Typography component="h1" variant="h5">
+                Sign In
+              </Typography>
+              {/* input Form */}
+              <FormProvider {...methods}>
+                <Box
+                  component="form"
+                  onSubmit={methods.handleSubmit(onSubmit)}
+                  sx={{ mt: 1 }}
+                >
+                  {/* Email */}
+                  <FormTextField
+                    name="email"
+                    label="Email Address"
+                    id="email"
+                    autoComplete="email"
+                  />
+                  {/* Password */}
+                  <FormTextField
+                    name="password"
+                    label="Password"
+                    id="password"
+                    type="password"
+                    autoComplete="current-password"
+                  />
+                  {/* TODO: add remember checkbox */}
+                  {/* <FormControlLabel
+                control={<Checkbox value="remember" color="primary" />}
+                label="Remember me"
+              /> */}
+                  {/* Button */}
+                  <LoginButton loginStatus={loginStatus}></LoginButton>
+                  <Grid container>
+                    {/* Forgot password? */}
+                    <Grid item xs>
+                      <Link href="/reset/reset-request" variant="body2">
+                        Forgot password?
+                      </Link>
+                    </Grid>
+                    {/* Don't have an account? Sign Up */}
+                    <Grid item>
+                      <Link href="signup" variant="body2">
+                        {"Don't have an account? Sign Up"}
+                      </Link>
+                    </Grid>
+                  </Grid>
+                </Box>
+              </FormProvider>
+            </Box>
+          </Container>
+        </motion.div>
+      </AnimatePresence>
       <Copyright sx={{ mt: 8, mb: 4 }} />
-    </Container>
+    </>
   );
 }
