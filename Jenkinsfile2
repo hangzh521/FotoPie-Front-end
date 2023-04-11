@@ -4,7 +4,7 @@ pipeline {
     tools {
         nodejs "nodejs"
     }
-    
+
     environment {
       ECR_REPO = 'node-app'
       IMAGE_TAG = 'latest'
@@ -22,11 +22,15 @@ pipeline {
              script {
                def scannerHome = tool 'SonarScanner'
                withSonarQubeEnv('SonarQube Server') {
-                sh "${scannerHome}/bin/sonar-scanner"
-             }
+                sh "${scannerHome}/bin/sonar-scanner \
+                 -Dsonar.projectKey=sonarqube-jenkns \
+                 -Dsonar.sources=. \
+                 -Dsonar.host.url=http://13.55.90.119:9000 \
+                 -Dsonar.login=sqp_5a729f384f4da3ebcae255abcf4814bc03650f61"
+              }
+            }
           }
         }
-      }
 
         stage('Build Docker Image') {
             environment {
@@ -45,12 +49,13 @@ pipeline {
                 AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
                 AWS_DEFAULT_REGION = credentials('AWS_DEFAULT_REGION')
                 ECR_REGISTRY = credentials('ECR_REGISTRY')
-            }
+              }
            steps {
                     sh 'aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY'
                     sh 'docker tag $ECR_REPO:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG'
                     sh 'docker push $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG'
-                }
-            }
-        }
-     }
+              }
+           }
+       }
+    }
+   
