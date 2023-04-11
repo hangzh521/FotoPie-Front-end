@@ -23,14 +23,14 @@ pipeline {
                def scannerHome = tool 'SonarScanner'
                withSonarQubeEnv('SonarQube Server') {
                 sh "${scannerHome}/bin/sonar-scanner \
-                 -Dsonar.projectKey=sonarqube-jenkns \
-                 -Dsonar.sources=. \
-                 -Dsonar.host.url=http://13.55.90.119:9000 \
-                 -Dsonar.login=sqp_5a729f384f4da3ebcae255abcf4814bc03650f61"
-              }
+                      -Dsonar.projectKey=fotopie-front-end \
+                      -Dsonar.sources=. \
+                      -Dsonar.host.url=http://3.26.153.19:9000 \
+                      -Dsonar.login=sqp_9a31c57237e96df5b6cf46df167d10f0ba9f6953"
+                  }
+               }
             }
-          }
-        }
+         }
 
         stage("Quality Gate") {
             steps {
