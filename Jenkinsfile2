@@ -12,6 +12,18 @@ pipeline {
                 checkout([$class: 'GitSCM', branches: [[name: '*/Do-06-Hang']], userRemoteConfigs: [[url: 'https://github.com/hangzh521/FotoPie-Front-end.git']]])
             }
         }
+
+        stage('SonarQube Scan') {
+            steps {
+             script {
+               def scannerHome = tool 'SonarScanner'
+               withSonarQubeEnv('SonarQube Server') {
+                sh "${scannerHome}/bin/sonar-scanner"
+             }
+          }
+        }
+      }
+
         stage('Build Docker Image') {
             environment {
                 BACKEND_API = credentials('BACKEND_API')
@@ -22,7 +34,7 @@ pipeline {
               sh 'docker build --build-arg BACKEND_API=$BACKEND_API --build-arg Get_Synonyms_API_Prefix=$Get_Synonyms_API_Prefix -t $ECR_REPO:$IMAGE_TAG .'
             }
          }
-
+        
         stage('Push Docker Image to ECR') {
             environment {
                 AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
