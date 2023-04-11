@@ -1,6 +1,10 @@
 pipeline {
     agent any
     
+    tools {
+        nodejs "nodejs"
+    }
+    
     environment {
       ECR_REPO = 'node-app'
       IMAGE_TAG = 'latest'
