@@ -80,7 +80,7 @@ pipeline {
               AWS_DEFAULT_REGION = credentials('AWS_DEFAULT_REGION')
             }
            steps {
-                   sh "aws ecs update-service --cluster $CLUSTER_NAME --service $SERVICE_NAME --task-definition $TASK_DEFINITION --force-new-deployment --region $AWS_DEFAULT_REGION --deployment"
+                   sh "aws ecs update-service --cluster $CLUSTER_NAME --service $SERVICE_NAME --task-definition $TASK_DEFINITION --force-new-deployment"
             }
          }
       }
