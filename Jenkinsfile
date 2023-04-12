@@ -6,42 +6,87 @@ pipeline {
     }
 
     environment {
-        AWS_DEFAULT_REGION = "ap-southeast-2"
-        BACKEND_API = credentials('BACKEND_API')
-        BACKEND_PORT = credentials('BACKEND_PORT')
+      ECR_REPO = 'fotopie-fed'
+      IMAGE_TAG = 'latest'
+      SONARQUBE_PROJECTKEY = 'fotopie-front-end'
+      CLUSTER_NAME = 'backend-cluster'
+      SERVICE_NAME = 'service-node-app'
+      TASK_DEFINITION = 'fotopie'
     }
 
     stages {
         stage('Checkout') {
             steps {
-                 git branch: 'Do-06-Hang', url: 'https://github.com/hangzh521/FotoPie-Front-end.git'
+                checkout([$class: 'GitSCM', branches: [[name: '*/UAT']], userRemoteConfigs: [[url: 'https://github.com/Go-Husky-FotoPie/FotoPie-Front-end.git']]])
+            }
+        }
+
+        stage('SonarQube Scan') {
+            environment {
+                sonarqube_token = credentials('sonarqube_token')
+                sonarqube_url = credentials('sonarqube_url')
+                }
+            steps {
+             script {
+               def scannerHome = tool 'SonarScanner'
+               withSonarQubeEnv('SonarQube Server') {
+                sh "${scannerHome}/bin/sonar-scanner \
+                      -Dsonar.projectKey=$SONARQUBE_PROJECTKEY \
+                      -Dsonar.sources=. \
+                      -Dsonar.host.url=$sonarqube_url \
+                      -Dsonar.login=$sonarqube_token"
+                  }
+               }
+            }
+         }
+
+        stage("Quality Gate") {
+            steps {
+              timeout(time: 2, unit: 'MINUTES') {
+                waitForQualityGate abortPipeline: true
+            }
+          }
+        }
+
+        stage('Build Docker Image') {
+            environment {
+                BACKEND_API = credentials('BACKEND_API')
+                Get_Synonyms_API_Prefix = credentials('Get_Synonyms_API_Prefix')
+            }
+        
+            steps {
+              sh 'docker build --build-arg BACKEND_API=$BACKEND_API --build-arg Get_Synonyms_API_Prefix=$Get_Synonyms_API_Prefix -t $ECR_REPO:$IMAGE_TAG .'
             }
         }
         
-        stage('Install Dependencies') {
-            steps {
-              sh 'npm install' 
-            }
-        }
+        stage('Push Docker Image to ECR') {
+            environment {
+                AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
+                AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
+                AWS_DEFAULT_REGION = credentials('AWS_DEFAULT_REGION')
+                ECR_REGISTRY = credentials('ECR_REGISTRY')
+              }
+           steps {
+                    sh 'aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY'
+                    sh 'docker tag $ECR_REPO:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG'
+                    sh 'docker push $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG'
+              }
+           }
         
-        stage('Build') {
-            steps {
-                sh 'npm run build'
+        stage('Update ECS Service') {
+            environment {
+              AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
+              AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
+              AWS_DEFAULT_REGION = credentials('AWS_DEFAULT_REGION')
             }
-        }
-        
-        stage('Export') {
-            steps {
-                sh 'npm run export'
+           steps {
+                   sh "aws ecs update-service --cluster $CLUSTER_NAME --service $SERVICE_NAME --task-definition $TASK_DEFINITION --force-new-deployment"
             }
-        }
-        
-        stage('Deploy') {
-            steps {
-                withAWS(region: "${env.AWS_DEFAULT_REGION}", credentials: 'my-aws-credentials') {
-                    sh "aws s3 sync ./out s3://www.hangzh.click/"
-             }
          }
       }
-   }
-}
+    }
+ 
+
+
+
+ 
