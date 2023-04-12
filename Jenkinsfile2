@@ -20,6 +20,7 @@ pipeline {
         stage('SonarQube Scan') {
             environment {
                 sonarqube_token = credentials('sonarqube_token')
+                sornarqube_url = credentials('sornarqube_url')
                 }
             steps {
              script {
@@ -28,9 +29,8 @@ pipeline {
                 sh "${scannerHome}/bin/sonar-scanner \
                       -Dsonar.projectKey=fotopie-front-end \
                       -Dsonar.sources=. \
-                      -Dsonar.host.url=http://3.26.153.19:9000 \
+                      -Dsonar.host.url=$sornarqube_url \
                       -Dsonar.login=$sonarqube_token"
-                    //   -Dsonar.login=sqp_9a31c57237e96df5b6cf46df167d10f0ba9f6953"
                   }
                }
             }
