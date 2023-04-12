@@ -6,8 +6,9 @@ pipeline {
     }
 
     environment {
-      ECR_REPO = 'node-app'
+      ECR_REPO = 'fotopie-fed'
       IMAGE_TAG = 'latest'
+      SONARQUBE_PROJECTKEY = 'fotopie-front-end'
     }
 
     stages {
@@ -27,7 +28,7 @@ pipeline {
                def scannerHome = tool 'SonarScanner'
                withSonarQubeEnv('SonarQube Server') {
                 sh "${scannerHome}/bin/sonar-scanner \
-                      -Dsonar.projectKey=fotopie-front-end \
+                      -Dsonar.projectKey=$SONARQUBE_PROJECTKEY \
                       -Dsonar.sources=. \
                       -Dsonar.host.url=$sonarqube_url \
                       -Dsonar.login=$sonarqube_token"
