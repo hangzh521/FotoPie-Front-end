@@ -14,7 +14,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                checkout([$class: 'GitSCM', branches: [[name: '*/Do-06-Hang']], userRemoteConfigs: [[url: 'https://github.com/hangzh521/FotoPie-Front-end.git']]])
+                checkout([$class: 'GitSCM', branches: [[name: '*/UAT']], userRemoteConfigs: [[url: 'https://github.com/Go-Husky-FotoPie/FotoPie-Front-end.git']]])
             }
         }
 
