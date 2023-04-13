@@ -50,7 +50,7 @@ pipeline {
             }
          }
 
-        stage("Quality Gate") {
+        stage("Quality Gate1") {
             steps {
               timeout(time: 2, unit: 'MINUTES') {
                 waitForQualityGate abortPipeline: true
@@ -80,7 +80,7 @@ pipeline {
                }
            }
 
-        stage("Quality Gate") {
+        stage("Quality Gate2") {
             steps {
                 timeout(time: 2, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
@@ -113,16 +113,16 @@ pipeline {
               }
            }
         
-        // stage('Update ECS Service') {
-        //     environment {
-        //       AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
-        //       AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
-        //       AWS_DEFAULT_REGION = credentials('AWS_DEFAULT_REGION')
-        //     }
-        //    steps {
-        //            sh "aws ecs update-service --cluster $CLUSTER_NAME --service $SERVICE_NAME --task-definition $TASK_DEFINITION --force-new-deployment"
-        //     }
-        //  }
+        stage('Update ECS Service') {
+            environment {
+              AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
+              AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
+              AWS_DEFAULT_REGION = credentials('AWS_DEFAULT_REGION')
+            }
+           steps {
+                   sh "aws ecs update-service --cluster $CLUSTER_NAME --service $SERVICE_NAME --task-definition $TASK_DEFINITION --force-new-deployment"
+            }
+         }
       }
     }
  
