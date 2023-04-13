@@ -9,6 +9,7 @@ pipeline {
       ECR_REPO = 'fotopie-fed'
       IMAGE_TAG = 'latest'
       SONARQUBE_PROJECTKEY = 'fotopie-front-end'
+      FEATURE_BRANCH = 'feature-branch'
       CLUSTER_NAME = 'backend-cluster'
       SERVICE_NAME = 'service-node-app'
       TASK_DEFINITION = 'fotopie'
@@ -21,7 +22,16 @@ pipeline {
             }
         }
 
-        stage('SonarQube Scan') {
+        stage('Checkout Feature Branch') {
+            when {
+                branch 'feat/*'
+            }
+            steps {
+                checkout([$class: 'GitSCM', branches: [[name: env.BRANCH_NAME]], userRemoteConfigs: [[url: 'https://github.com/Go-Husky-FotoPie/FotoPie-Front-end.git']]])
+            }
+        }
+
+        stage('SonarQube Scan for UAT') {
             environment {
                 sonarqube_token = credentials('sonarqube_token')
                 sonarqube_url = credentials('sonarqube_url')
@@ -46,6 +56,36 @@ pipeline {
                 waitForQualityGate abortPipeline: true
             }
           }
+        }
+
+        stage('SonarQube Scan for Feature Branch') {
+            when {
+                branch 'feat/*'
+            }
+            environment {
+                sonarqube_token = credentials('sonarqube_token')
+                sonarqube_url = credentials('sonarqube_url')
+            }
+            steps {
+                script {
+                    def scannerHome = tool 'SonarScanner'
+                    withSonarQubeEnv('SonarQube Server') {
+                        sh "${scannerHome}/bin/sonar-scanner \
+                            -Dsonar.projectKey=$FEATURE_BRANCH \
+                            -Dsonar.sources=. \
+                            -Dsonar.host.url=$sonarqube_url \
+                            -Dsonar.login=$sonarqube_token "        
+                     }
+                  }
+               }
+           }
+
+        stage("Quality Gate") {
+            steps {
+                timeout(time: 2, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
         }
 
         stage('Build Docker Image') {
@@ -73,16 +113,16 @@ pipeline {
               }
            }
         
-        stage('Update ECS Service') {
-            environment {
-              AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
-              AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
-              AWS_DEFAULT_REGION = credentials('AWS_DEFAULT_REGION')
-            }
-           steps {
-                   sh "aws ecs update-service --cluster $CLUSTER_NAME --service $SERVICE_NAME --task-definition $TASK_DEFINITION --force-new-deployment"
-            }
-         }
+        // stage('Update ECS Service') {
+        //     environment {
+        //       AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
+        //       AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
+        //       AWS_DEFAULT_REGION = credentials('AWS_DEFAULT_REGION')
+        //     }
+        //    steps {
+        //            sh "aws ecs update-service --cluster $CLUSTER_NAME --service $SERVICE_NAME --task-definition $TASK_DEFINITION --force-new-deployment"
+        //     }
+        //  }
       }
     }
  
