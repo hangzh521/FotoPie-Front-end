@@ -6,32 +6,23 @@ pipeline {
     }
 
     environment {
-      ECR_REPO = 'fotopie-fed'
+      ECR_REPO = 'fotopie-fed-uat'
       IMAGE_TAG = 'latest'
       SONARQUBE_PROJECTKEY = 'fotopie-front-end'
-      FEATURE_BRANCH = 'feature-branch'
-      CLUSTER_NAME = 'backend-cluster'
-      SERVICE_NAME = 'service-node-app'
-      TASK_DEFINITION = 'fotopie'
+      CLUSTER_NAME = 'fotopie-fed-uat-cluster'
+      SERVICE_NAME = 'fotopie-fed-uat-service'
+      TASK_DEFINITION = 'fotopie-fed-uat'
     }
 
     stages {
         stage('Checkout') {
             steps {
-                checkout([$class: 'GitSCM', branches: [[name: '*/UAT']], userRemoteConfigs: [[url: 'https://github.com/Go-Husky-FotoPie/FotoPie-Front-end.git']]])
+                checkout([$class: 'GitSCM', branches: [[name: '*/master']], userRemoteConfigs: [[url: 'https://github.com/Go-Husky-FotoPie/FotoPie-Front-end.git']]])
             }
         }
 
-        stage('Checkout Feature Branch') {
-            when {
-                branch 'feat/*'
-            }
-            steps {
-                checkout([$class: 'GitSCM', branches: [[name: env.BRANCH_NAME]], userRemoteConfigs: [[url: 'https://github.com/Go-Husky-FotoPie/FotoPie-Front-end.git']]])
-            }
-        }
-
-        stage('SonarQube Scan for UAT') {
+        
+        stage('SonarQube Scan') {
             environment {
                 sonarqube_token = credentials('sonarqube_token')
                 sonarqube_url = credentials('sonarqube_url')
@@ -50,42 +41,12 @@ pipeline {
             }
          }
 
-        stage("Quality Gate1") {
+        stage("Quality Gate") {
             steps {
               timeout(time: 2, unit: 'MINUTES') {
                 waitForQualityGate abortPipeline: true
             }
           }
-        }
-
-        stage('SonarQube Scan for Feature Branch') {
-            when {
-                branch 'feat/*'
-            }
-            environment {
-                sonarqube_token = credentials('sonarqube_token')
-                sonarqube_url = credentials('sonarqube_url')
-            }
-            steps {
-                script {
-                    def scannerHome = tool 'SonarScanner'
-                    withSonarQubeEnv('SonarQube Server') {
-                        sh "${scannerHome}/bin/sonar-scanner \
-                            -Dsonar.projectKey=$FEATURE_BRANCH \
-                            -Dsonar.sources=. \
-                            -Dsonar.host.url=$sonarqube_url \
-                            -Dsonar.login=$sonarqube_token "        
-                     }
-                  }
-               }
-           }
-
-        stage("Quality Gate2") {
-            steps {
-                timeout(time: 2, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
-                }
-            }
         }
 
         stage('Build Docker Image') {
